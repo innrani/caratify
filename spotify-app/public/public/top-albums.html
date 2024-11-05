@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your fav SEVENTEEN albums</title>
+    <link rel="stylesheet" href="album.css">
+    <link rel="stylesheet" href="loading.css">
+</head>
+<body> 
+    <div class="title-container">
+            <img src="https://i.ibb.co/VL8fTGK/tumblr-f3f85e3974438480c3aa10e0601562c6-09be720b-540.png" alt="Spotify Stats Icon" class="title-icon">
+            <h1>Your fav SEVENTEEN albums</h1>
+
+            </div>
+    <div class="container">
+        <div id="albums-container"></div>
+       
+
+        </div>
+    </div>
+
+    
+
+    <script>
+        window.onload = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const accessToken = urlParams.get('access_token');
+
+            try {
+                const response = await fetch('https://api.spotify.com/v1/me/top/tracks', {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+                const data = await response.json();
+                
+                const albumsMap = new Map();
+                data.items.forEach(track => {
+                    const album = track.album;
+                    // Filter for SEVENTEEN albums only
+                    if (album.artists.some(artist => artist.name.toUpperCase() === 'SEVENTEEN')) {
+                        if (albumsMap.has(album.id)) {
+                            albumsMap.get(album.id).count++;
+                        } else {
+                            albumsMap.set(album.id, {
+                                name: album.name,
+                                image: album.images[0].url,
+                                releaseDate: album.release_date,
+                                count: 1
+                            });
+                        }
+                    }
+                });
+
+                const sortedAlbums = [...albumsMap.entries()]
+                    .sort((a, b) => b[1].count - a[1].count);  
+
+                const container = document.getElementById('albums-container');
+                
+                if (sortedAlbums.length === 0) {
+                    container.innerHTML = '<h2>No SEVENTEEN albums found in your top tracks.</h2>';
+                    return;
+                }
+
+                sortedAlbums.forEach((album, index) => {
+                    const albumElement = document.createElement('div');
+                    albumElement.className = 'album-item';
+                    albumElement.innerHTML = `
+                        <img src="${album[1].image}" alt="${album[1].name}" style="width: 100px; height: 100px;">
+                        <div class="album-info">
+                            <h3>${index + 1}. ${album[1].name}</h3>
+                            <p>Release Date: ${album[1].releaseDate}</p>
+                            <p>Times Played: ${album[1].count}</p>
+                        </div>
+                    `;
+                    container.appendChild(albumElement);
+                });
+            } catch (error) {
+                console.error('Error fetching albums:', error);
+            }
+        };
+    </script>
+</body>
+</html>
+<div class="loading-screen">
+    <img src="https://i.postimg.cc/t43nwhCb/410zv9-TFMNL-AC-SX679-removebg-preview.png" alt="Loading..." class="loading-image">
+</div>
+
+<script>
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            document.querySelector('.loading-screen').classList.add('hidden');
+        }, 2000);
+    });
+</script>

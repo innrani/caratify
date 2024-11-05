@@ -1,0 +1,170 @@
+body {
+    background: linear-gradient(120deg, rgba(146, 168, 209, 0.9), rgba(247, 202, 201, 0.9)), rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.title-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 60px;
+    padding: 50px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+}
+
+.title-icon {
+        height: 120px;
+        width: 120px;
+        object-fit: contain;
+        border-radius: 10px;
+}
+
+.title-text {
+    font-size: 3.2rem;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+}
+
+.artists-container {
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.artist-item {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    align-items: center;
+    gap: 20px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    border-radius: 12px;
+    transition: transform 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.artist-item:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.artist-rank {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    min-width: 40px;
+}
+
+.artist-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.artist-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.artist-name {
+    font-weight: bold;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.title-container h1 {
+    font-size: 4.5rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.spotify-button {
+    background: #1DB954;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s ease;
+}
+
+.spotify-button:hover {
+    background: #1ed760;
+}
+
+/* Shine effect */
+.artist-item::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 200%;
+    height: 100%;
+    background: linear-gradient(120deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.4));
+    transition: transform 1s ease;
+    transform: skewX(-25deg);
+    opacity: 0;
+}
+
+.artist-item:hover::before {
+    transform: translateX(50%);
+    opacity: 1;
+}
+
+@media (max-width: 600px) {
+    .artist-item {
+        grid-template-columns: 1fr auto;
+        gap: 15px;
+    }
+
+    .artist-image {
+        display: none;
+    }
+
+    .title-text {
+        font-size: 1.8rem;
+    }
+}
+
+.button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.find-seventeen-button {
+    background: #1DB954;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 25px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.find-seventeen-button:hover {
+    transform: scale(1.05);
+    background: #84eba8;
+}
+
+.result-text {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+}

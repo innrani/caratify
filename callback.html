@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Callback</title>
+</head>
+<body>
+    <h1>Authorization Callback</h1>
+    <p>Processing your authorization...</p>
+
+    <script>
+        // Extract the authorization code from the URL
+        function getAuthorizationCode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('code');
+        }
+
+        const authorizationCode = getAuthorizationCode();
+
+        if (authorizationCode) {
+            // Here you can exchange the authorization code for an access token (usually on the server-side)
+            console.log('Authorization Code:', authorizationCode);
+            
+            // Redirect to another page or perform other actions
+            // For example, store the code and show a success message
+            document.body.innerHTML += `<p>Authorization Code: ${authorizationCode}</p>`;
+        } else {
+            // If there's no authorization code, show an error message
+            document.body.innerHTML += `<p>Error: No authorization code received.</p>`;
+        }
+    </script>
+</body>
+</html>
