@@ -4,11 +4,14 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+});
 
 const client_id = 'adefef0cb2e14e139ee5bcb1ec9e47c4';
 const client_secret = 'c1ab3e3638c84bbbb051fefa2783f302';
-const redirect_uri = 'http://localhost:3000/callback';
 
 // Middleware section - order matters
 app.use(cors());
