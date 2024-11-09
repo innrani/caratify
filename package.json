@@ -14,6 +14,10 @@
     "supertest": "^7.0.0"
   },
   "scripts": {
-    "test": "mocha --require esm"
+    "test": "mocha --require esm",
+    "start": "node server.mjs"
+  },
+  "engines": {
+    "node": "v20.17.0"
   }
 }
