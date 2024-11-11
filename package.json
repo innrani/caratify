@@ -15,7 +15,7 @@
   },
   "scripts": {
     "test": "mocha --require esm",
-    "start": "node server.mjs"
+    "start": "node backend/server.mjs"
   },
   "engines": {
     "node": "v20.17.0"
