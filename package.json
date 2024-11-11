@@ -1,10 +1,8 @@
 {
-  "name": "caratify"
-  "version": "1.0.0"
-  "main": "server.mjs"
-  "type": "module"
-
-  
+  "name": "caratify",
+  "version": "1.0.0",
+  "main": "server.mjs",
+  "type": "module",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.21.1"
@@ -21,7 +19,7 @@
   },
   "scripts": {
     "test": "mocha --require esm",
-    "start": "node server.mjs"
+    "start": "node backend/server.mjs"
   },
   "engines": {
     "node": "v20.17.0"
