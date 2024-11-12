@@ -4,17 +4,17 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
+// Load environment variables
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Environment variables configuration
 const client_id = process.env.SPOTIFY_CLIENT_ID;
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
 const redirect_uri = process.env.REDIRECT_URI || `http://localhost:${PORT}/callback`;
 
-// Middleware section - order matters
+
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -32,10 +32,14 @@ app.get('/login', (req, res) => {
     res.redirect(authUrl);
 });
 
+app.get('/top-artists', (req, res) => {
+    res.redirect('/login?type=artists');
+});
+
 app.get('/callback', async (req, res) => {
     const code = req.query.code || null;
     const state = req.query.state;
-    console.log('Callback state:', state);
+    console.log('Callback state:', state)
 
     try {
         // Get access token
@@ -55,7 +59,7 @@ app.get('/callback', async (req, res) => {
         const tokenData = await tokenResponse.json();
 
         if (tokenData.access_token) {
-            console.log(state);
+            console.log(state)
             switch(state) {
                 case 'artists':
                     res.redirect(`/top-artists.html?access_token=${tokenData.access_token}`);
@@ -79,9 +83,9 @@ app.get('/callback', async (req, res) => {
     }
 });
 
-// Routes
 app.get('/top-songs', async (req, res) => {
     const accessToken = req.query.access_token;
+
     try {
         const response = await fetch('https://api.spotify.com/v1/me/top/tracks', {
             headers: {
@@ -89,9 +93,11 @@ app.get('/top-songs', async (req, res) => {
             },
         });
 
+        // Log complete response
         const responseBody = await response.text();
         console.log('Response Body:', responseBody);
 
+        // Check if response was successful
         if (!response.ok) {
             console.log(`HTTP error! status: ${response.status}`);
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -123,6 +129,7 @@ app.get('/top-albums.html', (req, res) => {
 
 app.get('/find-seventeen', async (req, res) => {
     const accessToken = req.query.access_token;
+
     try {
         const response = await fetch('https://api.spotify.com/v1/me/top/artists?limit=50', {
             headers: {
@@ -131,6 +138,7 @@ app.get('/find-seventeen', async (req, res) => {
         });
 
         const data = await response.json();
+    
         const seventeenArtist = data.items.find(artist => 
             artist.name.toUpperCase() === 'SEVENTEEN'
         );
@@ -147,13 +155,31 @@ app.get('/find-seventeen', async (req, res) => {
                 position: null
             });
         }
+
     } catch (error) {
         console.error('Error finding SEVENTEEN:', error.message);
         res.status(500).send('Error finding SEVENTEEN: ' + error.message);
     }
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server is running at http://localhost:${PORT}`);
+// Start server - SINGLE listen call with proper error handling
+const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on port ${PORT}`);
+}).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.error(`Port ${PORT} is already in use`);
+        process.exit(1);
+    } else {
+        console.error('Server error:', err);
+        process.exit(1);
+    }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM signal received: closing HTTP server');
+    server.close(() => {
+        console.log('HTTP server closed');
+        process.exit(0);
+    });
 });
