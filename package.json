@@ -20,7 +20,8 @@
   },
   "scripts": {
     "test": "mocha --require esm",
-    "start": "node backend/server.mjs"
+    "start": "node backend/server.mjs",
+    "dev": "nodemon backend/server.mjs"
   },
   "engines": {
     "node": "v20.17.0"
