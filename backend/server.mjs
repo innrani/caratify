@@ -5,9 +5,8 @@ import cors from 'cors';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
 
 const client_id = 'adefef0cb2e14e139ee5bcb1ec9e47c4';
