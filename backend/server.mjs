@@ -7,11 +7,8 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-const port = process.env.PORT || 25712;
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
-
+const app = express();
+const PORT = process.env.PORT || 3000;
 
 const client_id = process.env.SPOTIFY_CLIENT_ID;
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -166,23 +163,49 @@ app.get('/find-seventeen', async (req, res) => {
 });
 
 // Start server - SINGLE listen call with proper error handling
-const server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running on port ${PORT}`);
-}).on('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-        console.error(`Port ${PORT} is already in use`);
-        process.exit(1);
-    } else {
-        console.error('Server error:', err);
+let server;
+const startServer = async () => {
+    try {
+        // Close existing connections if any
+        if (server) {
+            await new Promise((resolve) => server.close(resolve));
+        }
+
+        // Create new server
+        server = app.listen(PORT, '0.0.0.0', () => {
+            console.log(`Server is running on port ${PORT}`);
+        });
+
+        server.on('error', (err) => {
+            if (err.code === 'EADDRINUSE') {
+                console.error(`Port ${PORT} is already in use`);
+                setTimeout(() => {
+                    server.close();
+                    startServer();
+                }, 1000);
+            } else {
+                console.error('Server error:', err);
+                process.exit(1);
+            }
+        });
+
+        // Handle various shutdown signals
+        const signals = ['SIGTERM', 'SIGINT', 'SIGUSR2'];
+        signals.forEach(signal => {
+            process.on(signal, () => {
+                console.log(`${signal} received: closing HTTP server`);
+                server.close(() => {
+                    console.log('HTTP server closed');
+                    process.exit(0);
+                });
+            });
+        });
+
+    } catch (error) {
+        console.error('Failed to start server:', error);
         process.exit(1);
     }
-});
+};
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-    console.log('SIGTERM signal received: closing HTTP server');
-    server.close(() => {
-        console.log('HTTP server closed');
-        process.exit(0);
-    });
-});
+// Start the server
+startServer();
