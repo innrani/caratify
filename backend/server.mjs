@@ -2,15 +2,17 @@ import express from 'express';
 import fetch from 'node-fetch';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
 
-const client_id = 'adefef0cb2e14e139ee5bcb1ec9e47c4';
-const client_secret = 'c1ab3e3638c84bbbb051fefa2783f302';
+// Environment variables configuration
+const client_id = process.env.SPOTIFY_CLIENT_ID;
+const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
+const redirect_uri = process.env.REDIRECT_URI || `http://localhost:${PORT}/callback`;
 
 // Middleware section - order matters
 app.use(cors());
@@ -22,71 +24,64 @@ app.use(express.static('public'));
 app.get('/', (req, res) => {
     res.sendFile('index.html', { root: './public' });
 });
-// Rest of your routes follow here
-  app.get('/login', (req, res) => {
-      const scope = 'user-top-read user-read-recently-played user-library-read';
-      const state = req.query.type;
-      const authUrl = `https://accounts.spotify.com/authorize?response_type=code&client_id=${client_id}&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}`;
-      res.redirect(authUrl);
-  });
-  app.get('/top-artists', (req, res) => {
-      res.redirect('/login?type=artists');
-  });
 
-  app.get('/callback', async (req, res) => {
-      const code = req.query.code || null;
-      const state = req.query.state;
-      console.log('Callback state:', state)
+app.get('/login', (req, res) => {
+    const scope = 'user-top-read user-read-recently-played user-library-read';
+    const state = req.query.type;
+    const authUrl = `https://accounts.spotify.com/authorize?response_type=code&client_id=${client_id}&scope=${encodeURIComponent(scope)}&redirect_uri=${encodeURIComponent(redirect_uri)}&state=${state}`;
+    res.redirect(authUrl);
+});
 
-      try {
-          // Get access token
-          const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
-              method: 'POST',
-              headers: {
-                  'Authorization': 'Basic ' + Buffer.from(`${client_id}:${client_secret}`).toString('base64'),
-                  'Content-Type': 'application/x-www-form-urlencoded',
-              },
-              body: new URLSearchParams({
-                  grant_type: 'authorization_code',
-                  code: code,
-                  redirect_uri: redirect_uri
-              })
-          });
+app.get('/callback', async (req, res) => {
+    const code = req.query.code || null;
+    const state = req.query.state;
+    console.log('Callback state:', state);
 
-          const tokenData = await tokenResponse.json();
+    try {
+        // Get access token
+        const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Basic ' + Buffer.from(`${client_id}:${client_secret}`).toString('base64'),
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                grant_type: 'authorization_code',
+                code: code,
+                redirect_uri: redirect_uri
+            })
+        });
 
-          if (tokenData.access_token) {
-            console.log(state)
-              switch(state) {
-                  case 'artists':
-                      res.redirect(`/top-artists.html?access_token=${tokenData.access_token}`);
-                      break;
-                  case 'tracks':
-                      res.redirect(`/top-tracks.html?access_token=${tokenData.access_token}`);
-                      break;
-                  case 'albums':
-                      res.redirect(`/top-albums.html?access_token=${tokenData.access_token}`);
-                      break;
-                  default:
-                      res.redirect(`/sorry.html?access_token=${tokenData.access_token}`);
-              }
-          }
-      } catch (error) {
-          console.error('Error in callback:', error);
-          res.status(500).json({
-              error: 'Authentication failed',
-              details: error.message
-          });
-      }
-  });
+        const tokenData = await tokenResponse.json();
 
-  app.listen(PORT, () => {
-      console.log(`Server is running at http://localhost:${PORT}`);
-  });
+        if (tokenData.access_token) {
+            console.log(state);
+            switch(state) {
+                case 'artists':
+                    res.redirect(`/top-artists.html?access_token=${tokenData.access_token}`);
+                    break;
+                case 'tracks':
+                    res.redirect(`/top-tracks.html?access_token=${tokenData.access_token}`);
+                    break;
+                case 'albums':
+                    res.redirect(`/top-albums.html?access_token=${tokenData.access_token}`);
+                    break;
+                default:
+                    res.redirect(`/sorry.html?access_token=${tokenData.access_token}`);
+            }
+        }
+    } catch (error) {
+        console.error('Error in callback:', error);
+        res.status(500).json({
+            error: 'Authentication failed',
+            details: error.message
+        });
+    }
+});
 
+// Routes
 app.get('/top-songs', async (req, res) => {
     const accessToken = req.query.access_token;
-
     try {
         const response = await fetch('https://api.spotify.com/v1/me/top/tracks', {
             headers: {
@@ -94,11 +89,9 @@ app.get('/top-songs', async (req, res) => {
             },
         });
 
-        // Log complete response
         const responseBody = await response.text();
         console.log('Response Body:', responseBody);
 
-        // Check if response was successful
         if (!response.ok) {
             console.log(`HTTP error! status: ${response.status}`);
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -111,6 +104,7 @@ app.get('/top-songs', async (req, res) => {
         res.status(500).send('Error fetching data: ' + error.message);
     }
 });
+
 app.get('/top-tracks', (req, res) => {
     res.redirect('/login?type=tracks');
 });
@@ -129,7 +123,6 @@ app.get('/top-albums.html', (req, res) => {
 
 app.get('/find-seventeen', async (req, res) => {
     const accessToken = req.query.access_token;
-
     try {
         const response = await fetch('https://api.spotify.com/v1/me/top/artists?limit=50', {
             headers: {
@@ -138,7 +131,6 @@ app.get('/find-seventeen', async (req, res) => {
         });
 
         const data = await response.json();
-    
         const seventeenArtist = data.items.find(artist => 
             artist.name.toUpperCase() === 'SEVENTEEN'
         );
@@ -155,9 +147,13 @@ app.get('/find-seventeen', async (req, res) => {
                 position: null
             });
         }
-
     } catch (error) {
         console.error('Error finding SEVENTEEN:', error.message);
         res.status(500).send('Error finding SEVENTEEN: ' + error.message);
     }
+});
+
+// Start server
+app.listen(PORT, () => {
+    console.log(`Server is running at http://localhost:${PORT}`);
 });
