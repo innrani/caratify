@@ -124,7 +124,7 @@ app.get('/top-albums', (req, res) => {
 });
 
 app.get('/top-albums.html', (req, res) => {
-    res.sendFile('top-albums.html', { root: './public/public' });
+    res.sendFile('top-albums.html', { root: './public' });
 });
 
 app.get('/find-seventeen', async (req, res) => {
