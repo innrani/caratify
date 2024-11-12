@@ -19,7 +19,6 @@
     "supertest": "^7.0.0"
   },
   "scripts": {
-    "test": "mocha --require esm",
     "start": "node backend/server.mjs",
     "dev": "nodemon backend/server.mjs"
   },
