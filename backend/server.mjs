@@ -7,8 +7,11 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+const port = process.env.PORT || 25712;
+app.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
+});
+
 
 const client_id = process.env.SPOTIFY_CLIENT_ID;
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
