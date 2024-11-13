@@ -18,7 +18,10 @@
     "supertest": "^7.0.0"
   },
   "scripts": {
-    "start": "node backend/server.mjs",
+     "start": "node webServer.mjs", 
+    "start:api": "node apiServer.mjs", 
+    "start:web": "node webServer.mjs",
+    "start:dev": "npm-run-all --parallel start:web start:api"
     "dev": "nodemon backend/server.mjs"
   },
   "engines": {
