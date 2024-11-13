@@ -10,7 +10,7 @@ export const indexPage = `
     <meta property="og:title" content="CARAT-IFY">
     <meta property="og:description" content="Discover your SEVENTEEN listening stats on Spotify">
     <meta property="og:image" content="https://i.imgur.com/6Vbo1FS.png">
-    <meta property="og:url" content="your-site-url">
+    <meta property="og:url" content="https://caratify-964b2a7e01d7.herokuapp.com">
     <meta name="theme-color" content="#92A8D1">
     <title>CARAT-IFY</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
