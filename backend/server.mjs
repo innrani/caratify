@@ -174,49 +174,30 @@ app.get('/find-seventeen', async (req, res) => {
     });
 });
 
-// Server setup with graceful shutdown
-const startServer = () => {
-    let server;
+const server = app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
 
-    try {
-        server = app.listen(PORT, '0.0.0.0', () => {
-            console.log(`Server is running on port ${PORT}`);
-        });
-
-        const shutdown = async () => {
-            console.log('Shutting down gracefully...');
-            if (server) {
-                await new Promise((resolve) => {
-                    server.close((err) => {
-                        if (err) {
-                            console.error('Error during shutdown:', err);
-                            process.exit(1);
-                        }
-                        resolve();
-                    });
-                });
-            }
-            process.exit(0);
-        };
-
-        ['SIGTERM', 'SIGINT', 'SIGUSR2'].forEach(signal => {
-            process.on(signal, shutdown);
-        });
-
-        process.on('uncaughtException', (error) => {
-            console.error('Uncaught Exception:', error);
-            shutdown();
-        });
-
-        process.on('unhandledRejection', (reason, promise) => {
-            console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-            shutdown();
-        });
-
-    } catch (error) {
-        console.error('Failed to start server:', error);
-        process.exit(1);
-    }
+// Graceful shutdown handlers
+const shutdown = () => {
+    console.log('Shutting down gracefully...');
+    server.close(() => {
+        console.log('Server closed');
+        process.exit(0);
+    });
 };
 
-startServer();
+// Handle various shutdown signals
+['SIGTERM', 'SIGINT', 'SIGUSR2'].forEach(signal => {
+    process.on(signal, shutdown);
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('Uncaught Exception:', error);
+    shutdown();
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    shutdown();
+});
