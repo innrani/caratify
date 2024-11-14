@@ -23,7 +23,7 @@
     "supertest": "^7.0.0"
   },
   "scripts": {
-    "start": "backend/server.mjs"
+    "start": "node caratify/caratify/backend/server.mjs"
   },
   "engines": {
     "node": ">=20.17.0"
