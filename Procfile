@@ -1,1 +1,1 @@
-web:server.mjs
+web:backend/server.mjs
