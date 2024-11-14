@@ -174,6 +174,29 @@ app.get('/find-seventeen', async (req, res) => {
     });
 });
 
+// Server setup with graceful shutdown
+const startServer = () => {
+    let server;
+    let currentPort = PORT;
+    const maxRetries = 3;
+    let retryCount = 0;
+
+    const tryStartServer = () => {
+        try {
+            server = app.listen(currentPort, '0.0.0.0', () => {
+                console.log(`Server is running on port ${currentPort}`);
+            });
+        } catch (error) {
+            if (error.code === 'EADDRINUSE' && retryCount < maxRetries) {
+                retryCount++;
+                currentPort++;
+                console.log(`Port ${currentPort - 1} in use, trying port ${currentPort}`);
+                tryStartServer();
+            } else {
+                console.error('Failed to start server:', error);
+                process.exit(1);
+            }
+        }
 const server = app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
@@ -197,7 +220,16 @@ process.on('uncaughtException', (error) => {
     shutdown();
 });
 
+        process.on('unhandledRejection', (reason, promise) => {
+            console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+            shutdown();
+        });
+    };
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
     shutdown();
 });
+
+    tryStartServer();
+};
+startServer();
