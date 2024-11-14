@@ -1,2 +1,1 @@
-web: node backend/webServer.mjs
-api: node backend/apiServer.mjs
+web: node backend/server.mjs

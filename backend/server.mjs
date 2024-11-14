@@ -3,12 +3,13 @@ import fetch from 'node-fetch';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
+import path from 'path';
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
-const API_PORT = process.env.PORT || 3001; // Changed to PORT for Heroku compatibility
+const PORT = process.env.PORT || 3000;
 
 // Environment variables with validation
 const client_id = process.env.SPOTIFY_CLIENT_ID;
@@ -16,10 +17,10 @@ const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const BASE_URL = NODE_ENV === 'production' 
     ? process.env.BASE_URL 
-    : `http://localhost:${API_PORT}`;
+    : `http://localhost:${PORT}`;
 const CLIENT_URL = NODE_ENV === 'production'
     ? process.env.CLIENT_URL
-    : 'http://localhost:3000';
+    : `http://localhost:${PORT}`;
 const redirect_uri = `${BASE_URL}/callback`;
 
 // Validate required environment variables
@@ -36,6 +37,7 @@ app.use(cors({
 }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(path.resolve('public')));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -44,6 +46,15 @@ app.use((err, req, res, next) => {
         error: 'Internal Server Error',
         message: NODE_ENV === 'development' ? err.message : 'Something went wrong'
     });
+});
+
+// Static file routes
+app.get('/', (req, res) => {
+    res.sendFile('index.html', { root: path.resolve('public') });
+});
+
+app.get('/top-albums.html', (req, res) => {
+    res.sendFile('top-albums.html', { root: path.resolve('public') });
 });
 
 // Spotify Auth Routes
@@ -168,8 +179,8 @@ const startServer = () => {
     let server;
 
     try {
-        server = app.listen(API_PORT, '0.0.0.0', () => {
-            console.log(`API Server is running on ${BASE_URL}`);
+        server = app.listen(PORT, '0.0.0.0', () => {
+            console.log(`Server is running on port ${PORT}`);
         });
 
         const shutdown = async () => {
