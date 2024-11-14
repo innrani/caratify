@@ -4,6 +4,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import path from 'path';
+import * as Sentry from "@sentry/node";
 
 // Load environment variables
 dotenv.config();
@@ -11,11 +12,16 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Initialize Sentry before other middleware
 Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    environment: process.env.NODE_ENV || 'production',
-    tracesSampleRate: 1.0,
-  });
+  dsn: process.env.SENTRY_DSN,
+  environment: NODE_ENV,
+  integrations: [
+    new Sentry.Integrations.Http({ tracing: true }),
+    new Sentry.Integrations.Express({ app }),
+  ],
+  tracesSampleRate: NODE_ENV === 'production' ? 0.2 : 1.0,
+});
 
 const client_id = process.env.SPOTIFY_CLIENT_ID;
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -44,9 +50,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.resolve('public')));
 
 app.use(Sentry.Handlers.requestHandler());
+app.use(Sentry.Handlers.tracingHandler());
+
+// Add Sentry error handler before your existing error handler
+app.use(Sentry.Handlers.errorHandler());
 
 // Error handling middleware
 app.use((err, req, res, next) => {
+    Sentry.captureException(err);
     console.error(err.stack);
     res.status(500).json({
         error: 'Internal Server Error',
@@ -69,7 +80,26 @@ app.get('/login', (req, res) => {
     const state = req.query.type;
     const authUrl = new URL('https://accounts.spotify.com/authorize');
     authUrl.searchParams.append('response_type', 'code');
-    authUrl.searchParams.append('client_id', client_id);
+
+const spotifyFetch = async (url, accessToken) => {
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error?.message || `HTTP error! status: ${response.status}`);
+        }
+
+        return response.json();
+    } catch (error) {
+        Sentry.captureException(error);
+        throw error;
+    }
+};    authUrl.searchParams.append('client_id', client_id);
     authUrl.searchParams.append('scope', scope);
     authUrl.searchParams.append('redirect_uri', redirect_uri);
     authUrl.searchParams.append('state', state);
