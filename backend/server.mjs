@@ -19,7 +19,6 @@ Sentry.init({
 
 const client_id = process.env.SPOTIFY_CLIENT_ID;
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
-const NODE_ENV = process.env.NODE_ENV || 'development';
 const BASE_URL = NODE_ENV === 'production' 
     ? process.env.BASE_URL 
     : `http://localhost:${PORT}`;
@@ -43,6 +42,8 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.resolve('public')));
+
+app.use(Sentry.Handlers.requestHandler());
 
 // Error handling middleware
 app.use((err, req, res, next) => {
