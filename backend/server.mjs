@@ -11,7 +11,12 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Environment variables with validation
+Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || 'production',
+    tracesSampleRate: 1.0,
+  });
+
 const client_id = process.env.SPOTIFY_CLIENT_ID;
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
 const NODE_ENV = process.env.NODE_ENV || 'development';
