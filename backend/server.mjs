@@ -177,59 +177,65 @@ app.get('/find-seventeen', async (req, res) => {
 // Server setup with graceful shutdown
 const startServer = () => {
     let server;
-    let currentPort = PORT;
-    const maxRetries = 3;
-    let retryCount = 0;
+    const portRange = { min: 3000, max: 3999 };
+    
+    const getRandomPort = () => 
+        Math.floor(Math.random() * (portRange.max - portRange.min + 1)) + portRange.min;
 
-    const tryStartServer = () => {
+    const tryStartServer = (retries = 5) => {
+        const currentPort = getRandomPort();
+        
         try {
             server = app.listen(currentPort, '0.0.0.0', () => {
-                console.log(`Server is running on port ${currentPort}`);
+                console.log(`Server successfully started on port ${currentPort}`);
+            }).on('error', (err) => {
+                if (err.code === 'EADDRINUSE' && retries > 0) {
+                    console.log(`Port ${currentPort} in use, trying another random port`);
+                    tryStartServer(retries - 1);
+                } else {
+                    console.error('Server failed to start:', err);
+                    process.exit(1);
+                }
             });
+
+            // Keep existing shutdown handlers
+            const shutdown = async () => {
+                console.log('Shutting down gracefully...');
+                if (server) {
+                    await new Promise((resolve) => {
+                        server.close((err) => {
+                            if (err) {
+                                console.error('Error during shutdown:', err);
+                                process.exit(1);
+                            }
+                            resolve();
+                        });
+                    });
+                }
+                process.exit(0);
+            };
+
+            ['SIGTERM', 'SIGINT', 'SIGUSR2'].forEach(signal => {
+                process.on(signal, shutdown);
+            });
+
         } catch (error) {
-            if (error.code === 'EADDRINUSE' && retryCount < maxRetries) {
-                retryCount++;
-                currentPort++;
-                console.log(`Port ${currentPort - 1} in use, trying port ${currentPort}`);
-                tryStartServer();
-            } else {
-                console.error('Failed to start server:', error);
-                process.exit(1);
-            }
+            console.error('Failed to start server:', error);
+            process.exit(1);
         }
-const server = app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+    };
 
-// Graceful shutdown handlers
-const shutdown = () => {
-    console.log('Shutting down gracefully...');
-    server.close(() => {
-        console.log('Server closed');
-        process.exit(0);
-    });
+    tryStartServer();
 };
-
-// Handle various shutdown signals
-['SIGTERM', 'SIGINT', 'SIGUSR2'].forEach(signal => {
-    process.on(signal, shutdown);
-});
 
 process.on('uncaughtException', (error) => {
     console.error('Uncaught Exception:', error);
     shutdown();
 });
 
-        process.on('unhandledRejection', (reason, promise) => {
-            console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-            shutdown();
-        });
-    };
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
     shutdown();
 });
 
-    tryStartServer();
-};
 startServer();
