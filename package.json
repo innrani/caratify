@@ -23,7 +23,7 @@
     "supertest": "^7.0.0"
   },
   "scripts": {
-    "start": "node backend/server.mjs"
+    "start": "node backend/server.mjs",
     "dev": "node backend/server.mjs"
   },
   "engines": {
