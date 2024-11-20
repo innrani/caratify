@@ -6,7 +6,8 @@ import dotenv from 'dotenv';
 import path from 'path';
 import * as Sentry from "@sentry/node";
 import { nodeProfilingIntegration } from "@sentry/profiling-node";
-import { httpIntegration, expressIntegration } from "@sentry/node/dist/integrations";
+import { httpIntegration, expressIntegration } from "@sentry/node";
+
 
 // Load environment variables
 dotenv.config();

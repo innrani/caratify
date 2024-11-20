@@ -5,6 +5,7 @@
   "type": "module",
   "dependencies": {
     "@sentry/node": "^8.38.0",
+    "@sentry/profiling-node": "^8.39.0",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
