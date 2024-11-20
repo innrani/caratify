@@ -17,7 +17,7 @@ const PORT = process.env.PORT || 3000;
 // Initialize Sentry before other middleware
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
-  environment: NODE_ENV,
+  environment: process.env.NODE_ENV || 'development',
   integrations: [
     new Sentry.Integrations.Http({ tracing: true }),
     new Sentry.Integrations.Express({ app }),
