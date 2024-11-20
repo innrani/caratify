@@ -9,8 +9,6 @@ import * as Sentry from "@sentry/node";
 // Load environment variables
 dotenv.config();
 
-
-const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
