@@ -4,9 +4,6 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import path from 'path';
-import * as Sentry from "@sentry/node";
-import { nodeProfilingIntegration } from "@sentry/profiling-node";
-import { httpIntegration, expressIntegration } from "@sentry/node";
 
 
 // Load environment variables
@@ -15,18 +12,7 @@ dotenv.config();
 const app = express();
 // Use Heroku's dynamic port or fallback to 3000
 const PORT = process.env.PORT || 3000;
-
-// Initialize Sentry before other middleware
-Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  environment: process.env.NODE_ENV || 'development',
-  integrations: [
-    httpIntegration(),
-    expressIntegration({ app }),
-    nodeProfilingIntegration(),
-  ],
-  tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.2 : 1.0,
-});
+tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.2 : 1.0;
 
 const client_id = process.env.SPOTIFY_CLIENT_ID;
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -60,10 +46,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.resolve('public')));
 
-// Sentry request and tracing handlers
-app.use(Sentry.Handlers.requestHandler());
-app.use(Sentry.Handlers.tracingHandler());
-
 // Spotify API fetch utility
 const spotifyFetch = async (url, accessToken) => {
     try {
@@ -80,7 +62,7 @@ const spotifyFetch = async (url, accessToken) => {
 
         return response.json();
     } catch (error) {
-        Sentry.captureException(error);
+        console.error(error);
         throw error;
     }
 };
@@ -210,9 +192,6 @@ app.get('/top-albums.html', (req, res) => {
     });
 });
 
-// Sentry error handler
-app.use(Sentry.Handlers.errorHandler());
-
 // Final error handling middleware
 app.use((err, req, res, next) => {
     Sentry.captureException(err);
@@ -235,7 +214,6 @@ const startServer = () => {
 // Global error handlers
 process.on('uncaughtException', (error) => {
     console.error('Uncaught Exception:', error);
-    Sentry.captureException(error);
     process.exit(1);
 });
 
