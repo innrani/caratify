@@ -22,10 +22,9 @@ Sentry.init({
   ],
   tracesSampleRate: NODE_ENV === 'production' ? 0.2 : 1.0,
 });
-
 const client_id = process.env.SPOTIFY_CLIENT_ID;
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
-const BASE_URL = NODE_ENV === 'production' 
+const BASE_URL = process.env.NODE_ENV === 'production' 
     ? process.env.BASE_URL 
     : `http://localhost:${PORT}`;
 const CLIENT_URL = NODE_ENV === 'production'
@@ -54,7 +53,6 @@ app.use(Sentry.Handlers.tracingHandler());
 
 // Add Sentry error handler before your existing error handler
 app.use(Sentry.Handlers.errorHandler());
-
 // Error handling middleware
 app.use((err, req, res, next) => {
     Sentry.captureException(err);
@@ -80,24 +78,25 @@ app.get('/login', (req, res) => {
     const state = req.query.type;
     const authUrl = new URL('https://accounts.spotify.com/authorize');
     authUrl.searchParams.append('response_type', 'code');
+  const spotifyFetch = async (url, accessToken) => {
+      try {
+          const response = await fetch(url, {
+              headers: {
+                  'Authorization': `Bearer ${accessToken}`,
+              },
+          });
 
-const spotifyFetch = async (url, accessToken) => {
-    try {
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`,
-            },
-        });
+          if (!response.ok) {
+              const error = await response.json();
+              throw new Error(error.error?.message || `HTTP error! status: ${response.status}`);
+          }
 
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error?.message || `HTTP error! status: ${response.status}`);
-        }
-
-        return response.json();
-    } catch (error) {
-        Sentry.captureException(error);
-        throw error;
+          return response.json();
+      } catch (error) {
+          Sentry.captureException(error);
+          throw error;
+      }
+  };
     }
 };    authUrl.searchParams.append('client_id', client_id);
     authUrl.searchParams.append('scope', scope);
@@ -275,3 +274,8 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 startServer();
+
+app.use(Sentry.Handlers.requestHandler());
+app.use(Sentry.Handlers.tracingHandler());
+
+app.use(Sentry.Handlers.errorHandler());
