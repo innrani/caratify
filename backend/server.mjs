@@ -134,7 +134,6 @@ app.get('/callback', async (req, res) => {
 
     } catch (error) {
         console.error('Callback error:', error);
-        Sentry.captureException(error);
         res.redirect(`${CLIENT_URL}/error.html?error=${encodeURIComponent(error.message)}`);
     }
 });
@@ -148,7 +147,6 @@ app.get('/top-songs', async (req, res) => {
         );
         res.json(data);
     } catch (error) {
-        Sentry.captureException(error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -171,7 +169,6 @@ app.get('/find-seventeen', async (req, res) => {
             position: seventeenArtist ? data.items.indexOf(seventeenArtist) + 1 : null
         });
     } catch (error) {
-        Sentry.captureException(error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -194,7 +191,6 @@ app.get('/top-albums.html', (req, res) => {
 
 // Final error handling middleware
 app.use((err, req, res, next) => {
-    Sentry.captureException(err);
     console.error(err.stack);
     res.status(500).json({
         error: 'Internal Server Error',
@@ -212,8 +208,8 @@ const startServer = () => {
 };
 
 // Global error handlers
-process.on('uncaughtException', (error) => {
-    console.error('Uncaught Exception:', error);
+process.on('uncaughtException', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
     process.exit(1);
 });
 
