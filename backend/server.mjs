@@ -4,7 +4,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import path from 'path';
-
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
@@ -25,8 +25,8 @@ const CLIENT_URL = process.env.NODE_ENV === 'production'
 const redirect_uri = `${BASE_URL}/callback`;
 
 // Validate required environment variables
-if (!client_id || !client_secret) {
-    console.error('Missing required environment variables');
+if (!process.env.SPOTIFY_CLIENT_ID || !process.env.SPOTIFY_CLIENT_SECRET) {
+    console.error('Required Spotify credentials missing');
     process.exit(1);
 }
 
@@ -74,27 +74,21 @@ app.get('/health', (req, res) => {
     });
 });
 
-// Login route
+// Login route with improved logging
 app.get('/login', (req, res) => {
     const scope = 'user-top-read user-read-recently-played user-library-read';
     const state = req.query.type;
     
-    // Explicitly construct the full URL
-    const fullRedirectUri = process.env.NODE_ENV === 'production'
-        ? 'https://caratify-964b2a7e01d7.herokuapp.com/callback'
-        : 'http://localhost:3000/callback';
-
-    const authUrl = new URL('https://accounts.spotify.com/authorize');
-    
-    console.log('DEBUG Login Route:');
+    console.log('Auth Flow Debug:');
     console.log('Client ID:', client_id);
-    console.log('Full Redirect URI:', fullRedirectUri);
+    console.log('Redirect URI:', redirect_uri);
     console.log('State:', state);
     
+    const authUrl = new URL('https://accounts.spotify.com/authorize');
     authUrl.searchParams.append('response_type', 'code');
     authUrl.searchParams.append('client_id', client_id);
     authUrl.searchParams.append('scope', scope);
-    authUrl.searchParams.append('redirect_uri', fullRedirectUri);
+    authUrl.searchParams.append('redirect_uri', redirect_uri);
     authUrl.searchParams.append('state', state);
     
     res.redirect(authUrl.toString());
