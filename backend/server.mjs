@@ -98,32 +98,37 @@ app.get('/login', (req, res) => {
 app.get('/callback', async (req, res) => {
     const { code, state, error } = req.query;
 
-    if (error) {
-        return res.redirect(`${CLIENT_URL}/error.html?error=${error}`);
-    }
-    if (!code) {
-        return res.redirect(`${CLIENT_URL}/error.html?error=missing_code`);
+    // Add debug logging
+    console.log('Callback received:', { code, state, error });
+
+    if (error || !code) {
+        console.log('Auth error or missing code:', error || 'no code provided');
+        return res.redirect(`${CLIENT_URL}/error.html?error=${error || 'missing_code'}`);
     }
 
     try {
         const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
             method: 'POST',
             headers: {
-                'Authorization': `Basic ${Buffer.from(`${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`).toString('base64')}`,
+                'Authorization': `Basic ${Buffer.from(`${client_id}:${client_secret}`).toString('base64')}`,
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: new URLSearchParams({
                 grant_type: 'authorization_code',
                 code,
-                redirect_uri: process.env.SPOTIFY_REDIRECT_URI
+                redirect_uri
             })
         });
 
         const tokenData = await tokenResponse.json();
+        
         if (!tokenResponse.ok) {
-        throw new Error(tokenData.error || 'Failed to get access token');
+            throw new Error(tokenData.error || 'Failed to get access token');
         }
 
+        // Add success logging
+        console.log('Token obtained successfully');
+        
         const redirectMap = {
             'artists': '/top-artists.html',
             'tracks': '/top-tracks.html',
@@ -134,7 +139,7 @@ app.get('/callback', async (req, res) => {
         res.redirect(`${CLIENT_URL}${redirectPath}?access_token=${tokenData.access_token}`);
 
     } catch (error) {
-        console.error('Callback error:', error);
+        console.error('Token exchange failed:', error);
         res.redirect(`${CLIENT_URL}/error.html?error=${encodeURIComponent(error.message)}`);
     }
 });
@@ -222,3 +227,8 @@ process.on('unhandledRejection', (reason, promise) => {
 // Start the server
 startServer();
 console.log('Redirect URI:', redirect_uri);
+
+// Add explicit route for error page
+app.get('/error.html', (req, res) => {
+    res.sendFile('error.html', { root: path.resolve('public') });
+});
