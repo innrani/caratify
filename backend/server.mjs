@@ -6,13 +6,11 @@ import dotenv from 'dotenv';
 import path from 'path';
 
 
-// Load environment variables
-dotenv.config();
+require('dotenv').config();
 
 const app = express();
 // Use Heroku's dynamic port or fallback to 3000
 const PORT = process.env.PORT || 3000;
-tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.2 : 1.0;
 
 const client_id = process.env.SPOTIFY_CLIENT_ID;
 const client_secret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -80,12 +78,23 @@ app.get('/health', (req, res) => {
 app.get('/login', (req, res) => {
     const scope = 'user-top-read user-read-recently-played user-library-read';
     const state = req.query.type;
+    
+    // Explicitly construct the full URL
+    const fullRedirectUri = process.env.NODE_ENV === 'production'
+        ? 'https://caratify-964b2a7e01d7.herokuapp.com/callback'
+        : 'http://localhost:3000/callback';
+
     const authUrl = new URL('https://accounts.spotify.com/authorize');
+    
+    console.log('DEBUG Login Route:');
+    console.log('Client ID:', client_id);
+    console.log('Full Redirect URI:', fullRedirectUri);
+    console.log('State:', state);
     
     authUrl.searchParams.append('response_type', 'code');
     authUrl.searchParams.append('client_id', client_id);
     authUrl.searchParams.append('scope', scope);
-    authUrl.searchParams.append('redirect_uri', redirect_uri);
+    authUrl.searchParams.append('redirect_uri', fullRedirectUri);
     authUrl.searchParams.append('state', state);
     
     res.redirect(authUrl.toString());
@@ -98,7 +107,6 @@ app.get('/callback', async (req, res) => {
     if (error) {
         return res.redirect(`${CLIENT_URL}/error.html?error=${error}`);
     }
-
     if (!code) {
         return res.redirect(`${CLIENT_URL}/error.html?error=missing_code`);
     }
@@ -107,20 +115,19 @@ app.get('/callback', async (req, res) => {
         const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
             method: 'POST',
             headers: {
-                'Authorization': `Basic ${Buffer.from(`${client_id}:${client_secret}`).toString('base64')}`,
+                'Authorization': `Basic ${Buffer.from(`${process.env.SPOTIFY_CLIENT_ID}:${process.env.SPOTIFY_CLIENT_SECRET}`).toString('base64')}`,
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: new URLSearchParams({
                 grant_type: 'authorization_code',
                 code,
-                redirect_uri
+                redirect_uri: process.env.SPOTIFY_REDIRECT_URI
             })
         });
 
         const tokenData = await tokenResponse.json();
-
         if (!tokenResponse.ok) {
-            throw new Error(tokenData.error || 'Failed to get access token');
+        throw new Error(tokenData.error || 'Failed to get access token');
         }
 
         const redirectMap = {
@@ -221,3 +228,4 @@ process.on('unhandledRejection', (reason, promise) => {
 
 // Start the server
 startServer();
+console.log('Redirect URI:', redirect_uri);
