@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 
 
-require('dotenv').config();
+dotenv.config();
 
 const app = express();
 // Use Heroku's dynamic port or fallback to 3000
@@ -60,8 +60,8 @@ const spotifyFetch = async (url, accessToken) => {
 
         return response.json();
     } catch (error) {
-        console.error(error);
-        throw error;
+        console.error('Callback error:', error);
+        res.redirect(`${CLIENT_URL}/error.html?error=${encodeURIComponent(error.message)}`);
     }
 };
 
@@ -222,7 +222,6 @@ process.on('uncaughtException', (reason, promise) => {
 
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-    Sentry.captureException(reason);
     process.exit(1);
 });
 
