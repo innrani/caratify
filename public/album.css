@@ -1,3 +1,7 @@
+:root {
+    --base-font: clamp(14px, 2vw, 18px);
+    --title-font: clamp(2rem, 5vw, 4.5rem);
+}
 
 body {
     background: linear-gradient(120deg, rgba(146, 168, 209, 0.9), rgba(247, 202, 201, 0.9)), rgba(0, 0, 0, 0.95);
@@ -9,35 +13,36 @@ body {
     align-items: center;
 }
   .title-container {
-      width: 100%;
+      width: 90%;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 60px;
-      padding: 50px;
+      padding: 15px;
       margin-bottom: 40px;
       background: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(5px);
+      max-width: 8000px;;
   }
 .title-icon {
-    height: 120px;
-    width: 120px;
-    object-fit: contain;
-    border-radius: 10px;
+    height: clamp(60px, 15vw, 120px);
+    width: clamp(60px, 15vw, 120px);
 }
 
 .title-container h1 {
-    font-size: 3.2rem;
+    font-size: var(--title-font);
     font-weight: bold;
     color: #333;
     text-align: center;
+    padding: 20px;
+    gap: 20px;
 }
 
 .albums-container, #albums-container {
-    width: 100%;
+    width: 90%;
      max-width: 800px;
       margin: 40px auto;
-      padding: 20px;
+      padding: 15px;
       display: fixed;
       flex-direction: column;
       align-items: center;
@@ -46,7 +51,7 @@ body {
  
 .album-item {
     display: grid;
-    grid-template-columns: auto auto 1fr auto;
+    grid-template-columns: minmax(30px, auto) minmax(60px, 80px) 1fr auto;
     align-items: center;
     gap: 20px;
     padding: 10px;
@@ -65,10 +70,8 @@ body {
 }
 
 .album-cover {
-    width: 60px;
-    height: 60px;
-    border-radius: 8px;
-    object-fit: cover;
+    width: 50px;
+    height: 50px;
 }
 
 /* Shine effect */
@@ -90,15 +93,15 @@ body {
     opacity: 1;
 }
 .album-rank {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: bold;
     color: #333;
-    min-width: 40px;
+    min-width: 30px;
 }
 
 .album-cover {
-    width: 80px;
-    height: 80px;
+    width: 50px;
+    height: 50px;
     border-radius: 8px;
     object-fit: cover;
 }
@@ -107,12 +110,13 @@ body {
     display: flex;
     flex-direction: column;
     gap: 5px;
+    font-size: var(--base-font);
 }
 
 .album-name {
     font-weight: bold;
     color: #333;
-    font-size: 1.1rem;
+    font-size: 1rem;
 }
 
 .album-artist {

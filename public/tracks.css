@@ -56,30 +56,38 @@ body {
       align-items: center;
   }
 
-  #tracks-list {
-      width: 100%;
-      max-width: 800px;
-  }
-  .track-item {
-      display: grid;
-      grid-template-columns: auto auto 1fr auto;
-      align-items: center;
-      gap: 20px;
-      padding: 15px;
-      margin-bottom: 15px;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(5px);
-      border-radius: 12px;
-      transition: transform 0.3s ease, background 0.3s ease;
-      overflow: hidden;
-  }
+:root {
+    --base-font: clamp(14px, 2vw, 18px);
+    --title-font: clamp(2rem, 5vw, 4.5rem);
+}
 
-  .track-rank {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #333;
-      min-width: 40px;
-  }
+.tracks-container, #tracks-list {
+    width: 90%;
+    max-width: 800px;
+    padding: 15px;
+}
+
+.track-item {
+    display: grid;
+    grid-template-columns: minmax(30px, auto) minmax(60px, 80px) 1fr auto;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    border-radius: 12px;
+    transition: transform 0.3s ease, background 0.3s ease;
+    overflow: hidden;
+}
+
+.track-rank {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+    min-width: 40px;
+}
+
 .track-item:hover {
     transform: translateY(-3px);
     background: rgba(255, 255, 255, 0.2);
@@ -88,7 +96,13 @@ body {
 /* Shine effect */
 .track-item::before {
     content: "";
-    position: absolute;
+
+@media (max-width: 768px) {
+    .track-item {
+        grid-template-columns: auto 1fr;
+        gap: 10px;
+    }
+}    position: absolute;
     top: 0;
     left: -100%; /* Start the shine from outside the left edge */
     width: 200%; /* Cover width for smooth transition */

@@ -1,3 +1,8 @@
+:root {
+    --base-font: clamp(14px, 2vw, 18px);
+    --title-font: clamp(2rem, 5vw, 4.5rem);
+}
+
 body {
     background: linear-gradient(120deg, rgba(146, 168, 209, 0.9), rgba(247, 202, 201, 0.9)), rgba(0, 0, 0, 0.95);
     backdrop-filter: blur(10px);
@@ -9,8 +14,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 60px;
-    padding: 50px;
+    gap: 20px;
+    padding: 20px;
     background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(5px);
 }
@@ -30,16 +35,17 @@ body {
 }
 
 .artists-container {
+    width: 90%;
     max-width: 900px;
     margin: 40px auto;
-    padding: 20px;
+    padding: 15px;
 }
 
 .artist-item {
     display: grid;
-    grid-template-columns: auto auto 1fr auto;
+    grid-template-columns: minmax(30px, auto) minmax(60px, 80px) 1fr auto;
     align-items: center;
-    gap: 20px;
+    gap: 15px;
     padding: 15px;
     margin-bottom: 15px;
     background: rgba(255, 255, 255, 0.1);
@@ -64,10 +70,15 @@ body {
 
 .artist-image {
     width: 60px;
+}
+
+.artist-image {
+    width: 60px;
     height: 60px;
     border-radius: 50%;
     object-fit: cover;
 }
+
 
 .artist-info {
     display: flex;
