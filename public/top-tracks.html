@@ -41,8 +41,6 @@
         async function fetchTopTracks() {
             const urlParams = new URLSearchParams(window.location.search);
             const accessToken = urlParams.get('access_token');
-
-            // Spotify IDs for SEVENTEEN and related members
             const SEVENTEEN_IDS = [
                 '7nqOGRxlXj7N2JYbgNEjYH', // SEVENTEEN
                 '5YaeXxzvqGNBCguELlKo6G', // Dino
@@ -65,12 +63,10 @@
 
                 const tracksList = document.getElementById('tracks-list');
                 
-                // Filter for SEVENTEEN and related members' tracks using artist IDs
                 const seventeenTracks = data.items.filter(track => {
                     return track.artists.some(artist => SEVENTEEN_IDS.includes(artist.id));
                 });
 
-                // Display message if no SEVENTEEN or related tracks found
                 if (seventeenTracks.length === 0) {
                     const messageDiv = document.createElement('div');
                     messageDiv.className = 'no-tracks-message';
@@ -79,7 +75,6 @@
                     return;
                 }
 
-                // Display only SEVENTEEN and related tracks
                 seventeenTracks.forEach((track, index) => {
                     const div = document.createElement('div');
                     div.className = 'track-item';
