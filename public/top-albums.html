@@ -9,65 +9,109 @@
 </head>
 <body> 
     <div class="title-container">
-            <img src="https://i.ibb.co/VL8fTGK/tumblr-f3f85e3974438480c3aa10e0601562c6-09be720b-540.png" alt="Spotify Stats Icon" class="title-icon">
-            <h1>Your fav SEVENTEEN albums</h1>
-
-            </div>
+        <img src="https://i.ibb.co/VL8fTGK/tumblr-f3f85e3974438480c3aa10e0601562c6-09be720b-540.png" alt="Spotify Stats Icon" class="title-icon">
+        <h1>Your fav SEVENTEEN albums</h1>
+    </div>
     <div class="container">
         <div id="albums-container"></div>
-       
-
-        </div>
     </div>
 
-    
+    <div class="loading-screen">
+        <img src="https://i.postimg.cc/t43nwhCb/410zv9-TFMNL-AC-SX679-removebg-preview.png" alt="Loading..." class="loading-image">
+    </div>
 
     <script>
         window.onload = async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const accessToken = urlParams.get('access_token');
 
+            // Spotify IDs for SEVENTEEN and related members
+            const SEVENTEEN_IDS = [
+                '7nqOGRxlXj7N2JYbgNEjYH', // SEVENTEEN
+                '5YaeXxzvqGNBCguELlKo6G', // Dino
+                '1uAT5bTSp6dWbNmixIUP5t', // BSS
+                '7GvlsjcgBrsE578yghOq7D', // jXw
+                '0Vb2DjojEYsasFpc3aTZb6', // Seungkwan
+                '6nWKAdMv1BDq1zHfZzkdbR', // Hoshi
+                '4TdiASPlU3QdZvGQBothcQ', // Woozi
+                '7G1kUsPtQCdolV6CPwHmh2', // Dokyeom
+                '2Y34b9AOK30zXgL7cAH4NG', // Vernon
+                '38Gn0ZVC8TQwuaMxBK1yRV', // Jun
+                '4DqFd6XE3dX4LWXHJVVpLk'  // The8
+            ];
+
             try {
-                const response = await fetch('https://api.spotify.com/v1/me/top/tracks', {
+                // Fetch all-time top tracks
+                const response = await fetch('https://api.spotify.com/v1/me/top/tracks?time_range=long_term&limit=50', {
                     headers: {
                         'Authorization': `Bearer ${accessToken}`
                     }
                 });
                 const data = await response.json();
-                
+                console.log('API Response:', data); // Debugging: Log the API response
+
+                if (!data.items || data.items.length === 0) {
+                    console.error('No tracks found in the API response.');
+                    document.getElementById('albums-container').innerHTML = '<h2>No tracks found in your top tracks.</h2>';
+                    return;
+                }
+
                 const albumsMap = new Map();
+
+                // Process each track
                 data.items.forEach(track => {
                     const album = track.album;
-                    // Filter for SEVENTEEN albums only
-                    if (album.artists.some(artist => artist.name.toUpperCase() === 'SEVENTEEN')) {
+                    console.log('Track:', track.name, 'Album:', album.name); // Debugging: Log each track and album
+
+                    // Check if the track belongs to SEVENTEEN or related members
+                    const isSEVENTEEN = album.artists.some(artist => {
+                        const isMatch = SEVENTEEN_IDS.includes(artist.id);
+                        if (isMatch) {
+                            console.log('Artist Match:', artist.name, 'ID:', artist.id); // Debugging: Log matching artists
+                        }
+                        return isMatch;
+                    });
+                    console.log('Is SEVENTEEN or related:', isSEVENTEEN); // Debugging: Log if the track is by SEVENTEEN or related members
+
+                    if (isSEVENTEEN) {
+                        console.log('SEVENTEEN or Related Track Found:', track.name, 'from Album:', album.name); // Debugging: Log SEVENTEEN or related tracks
+
                         if (albumsMap.has(album.id)) {
-                            albumsMap.get(album.id).count++;
+                            // If the album is already in the map, increment the play count
+                            albumsMap.get(album.id).count += 1;
                         } else {
+                            // If the album is not in the map, add it with the initial play count
                             albumsMap.set(album.id, {
                                 name: album.name,
-                                image: album.images[0].url,
+                                image: album.images[0]?.url || 'https://via.placeholder.com/100', // Fallback image if no image is available
                                 releaseDate: album.release_date,
-                                count: 1
+                                count: 1 // Start with 1 for the first track play
                             });
                         }
                     }
                 });
 
+                console.log('Albums Map:', albumsMap); // Debugging: Log the albums map
+
+                // Sort albums by total plays
                 const sortedAlbums = [...albumsMap.entries()]
-                    .sort((a, b) => b[1].count - a[1].count);  
+                    .sort((a, b) => b[1].count - a[1].count);
+
+                console.log('Sorted Albums:', sortedAlbums); // Debugging: Log the sorted albums
 
                 const container = document.getElementById('albums-container');
                 
                 if (sortedAlbums.length === 0) {
-                    container.innerHTML = '<h2>No SEVENTEEN albums found in your top tracks.</h2>';
+                    container.innerHTML = '<h2>No SEVENTEEN or related albums found in your top tracks.</h2>';
                     return;
                 }
 
+                // Display the albums
                 sortedAlbums.forEach((album, index) => {
                     const albumElement = document.createElement('div');
                     albumElement.className = 'album-item';
                     albumElement.innerHTML = `
-                        <img src="${album[1].image}" alt="${album[1].name}" style="width: 100px; height: 100px;">
+                        <img src="${album[1].image}" alt="${album[1].name}">
                         <div class="album-info">
                             <h3>${index + 1}. ${album[1].name}</h3>
                             <p>Release Date: ${album[1].releaseDate}</p>
@@ -78,19 +122,15 @@
                 });
             } catch (error) {
                 console.error('Error fetching albums:', error);
+                document.getElementById('albums-container').innerHTML = '<h2>An error occurred while fetching your top tracks.</h2>';
             }
         };
+
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.querySelector('.loading-screen').classList.add('hidden');
+            }, 2000);
+        });
     </script>
 </body>
 </html>
-<div class="loading-screen">
-    <img src="https://i.postimg.cc/t43nwhCb/410zv9-TFMNL-AC-SX679-removebg-preview.png" alt="Loading..." class="loading-image">
-</div>
-
-<script>
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            document.querySelector('.loading-screen').classList.add('hidden');
-        }, 2000);
-    });
-</script>

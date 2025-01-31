@@ -14,10 +14,15 @@
             backdrop-filter: blur(5px);
             border-radius: 15px;
         }
+        .no-tracks-message {
+            text-align: center;
+            padding: 20px;
+            color: white;
+            font-size: 1.2em;
+        }
     </style>
 </head>
 <body>
-    
     <div class="title-container">
         <img src="https://i.ibb.co/VL8fTGK/tumblr-f3f85e3974438480c3aa10e0601562c6-09be720b-540.png" alt="Spotify Stats Icon" class="title-icon">
         <h1>Your fav SVT tracks 😁</h1>
@@ -29,47 +34,86 @@
 
     <div class="results-container">
         <div class="result-column">
-
-        
+        </div>
+    </div>
 
     <script>
         async function fetchTopTracks() {
             const urlParams = new URLSearchParams(window.location.search);
             const accessToken = urlParams.get('access_token');
-    
-            const response = await fetch('https://api.spotify.com/v1/me/top/tracks', {
-                headers: { 'Authorization': `Bearer ${accessToken}` }
-            });
-            const data = await response.json();
-    
-            const tracksList = document.getElementById('tracks-list');
-            data.items.forEach((track, index) => {
-                const div = document.createElement('div');
-                div.className = 'track-item';
-                div.innerHTML = `
-                    <span class="track-rank">#${index + 1}</span>
-                    <img class="track-cover" src="${track.album.images[0].url}" alt="${track.album.name}">
-                    <div class="track-info">
-                        <span class="track-name">${track.name}</span>
-                        <span class="track-artist">${track.artists[0].name}</span>
-                    </div>
-                    <a href="${track.external_urls.spotify}" target="_blank" class="spotify-button">Play</a>
-                `;
-                tracksList.appendChild(div);
-            });
+
+            // Spotify IDs for SEVENTEEN and related members
+            const SEVENTEEN_IDS = [
+                '7nqOGRxlXj7N2JYbgNEjYH', // SEVENTEEN
+                '5YaeXxzvqGNBCguELlKo6G', // Dino
+                '1uAT5bTSp6dWbNmixIUP5t', // BSS
+                '7GvlsjcgBrsE578yghOq7D', // jXw
+                '0Vb2DjojEYsasFpc3aTZb6', // Seungkwan
+                '6nWKAdMv1BDq1zHfZzkdbR', // Hoshi
+                '4TdiASPlU3QdZvGQBothcQ', // Woozi
+                '7G1kUsPtQCdolV6CPwHmh2', // Dokyeom
+                '2Y34b9AOK30zXgL7cAH4NG', // Vernon
+                '38Gn0ZVC8TQwuaMxBK1yRV', // Jun
+                '4DqFd6XE3dX4LWXHJVVpLk'  // The8
+            ];
+
+            try {
+                const response = await fetch('https://api.spotify.com/v1/me/top/tracks?limit=50&time_range=long_term', {
+                    headers: { 'Authorization': `Bearer ${accessToken}` }
+                });
+                const data = await response.json();
+
+                const tracksList = document.getElementById('tracks-list');
+                
+                // Filter for SEVENTEEN and related members' tracks using artist IDs
+                const seventeenTracks = data.items.filter(track => {
+                    return track.artists.some(artist => SEVENTEEN_IDS.includes(artist.id));
+                });
+
+                // Display message if no SEVENTEEN or related tracks found
+                if (seventeenTracks.length === 0) {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'no-tracks-message';
+                    messageDiv.textContent = 'No SEVENTEEN or related tracks found in your top tracks. Try listening to more SEVENTEEN!';
+                    tracksList.appendChild(messageDiv);
+                    return;
+                }
+
+                // Display only SEVENTEEN and related tracks
+                seventeenTracks.forEach((track, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'track-item';
+                    div.innerHTML = `
+                        <span class="track-rank">#${index + 1}</span>
+                        <img class="track-cover" src="${track.album.images[0].url}" alt="${track.album.name}">
+                        <div class="track-info">
+                            <span class="track-name">${track.name}</span>
+                            <span class="track-artist">${track.artists.map(artist => artist.name).join(', ')}</span>
+                        </div>
+                        <a href="${track.external_urls.spotify}" target="_blank" class="spotify-button">Play</a>
+                    `;
+                    tracksList.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error fetching tracks:', error);
+                const tracksList = document.getElementById('tracks-list');
+                tracksList.innerHTML = '<div class="no-tracks-message">Error loading tracks. Please try again later.</div>';
+            }
         }
+        
         fetchTopTracks();
+    </script>
+
+    <div class="loading-screen">
+        <img src="https://i.postimg.cc/t43nwhCb/410zv9-TFMNL-AC-SX679-removebg-preview.png" alt="Loading..." class="loading-image">
+    </div>
+
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.querySelector('.loading-screen').classList.add('hidden');
+            }, 2000);
+        });
     </script>
 </body>
 </html>
-<div class="loading-screen">
-    <img src="https://i.postimg.cc/t43nwhCb/410zv9-TFMNL-AC-SX679-removebg-preview.png" alt="Loading..." class="loading-image">
-</div>
-
-<script>
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            document.querySelector('.loading-screen').classList.add('hidden');
-        }, 2000);
-    });
-</script>

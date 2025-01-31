@@ -34,15 +34,6 @@ export const indexPage = `
     <div id="stats-display" class="hidden"></div>
 
     <script type="module" src="app.mjs" defer></script>
-
-    <iframe id="spotifyPlayer"
-        src="https://open.spotify.com/embed/track/145tqlcE6YFsjNfxi9K3AE"
-        width="0"
-        height="0"
-        frameborder="0"
-        allow="encrypted-media; autoplay"
-        loading="eager">
-    </iframe>
 </body>
 </html>
 `;

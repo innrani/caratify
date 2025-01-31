@@ -18,26 +18,43 @@
     <div class="artists-container" id="artists-list"></div>
 
     <script>
+        // Spotify IDs for SEVENTEEN and related members
+        const SEVENTEEN_IDS = [
+            '7nqOGRxlXj7N2JYbgNEjYH', // SEVENTEEN
+            '5YaeXxzvqGNBCguELlKo6G', // Dino
+            '1uAT5bTSp6dWbNmixIUP5t', // BSS
+            '7GvlsjcgBrsE578yghOq7D', // jXw
+            '0Vb2DjojEYsasFpc3aTZb6', // Seungkwan
+            '6nWKAdMv1BDq1zHfZzkdbR', // Hoshi
+            '4TdiASPlU3QdZvGQBothcQ', // Woozi
+            '7G1kUsPtQCdolV6CPwHmh2', // Dokyeom
+            '2Y34b9AOK30zXgL7cAH4NG', // Vernon
+            '38Gn0ZVC8TQwuaMxBK1yRV', // Jun
+            '4DqFd6XE3dX4LWXHJVVpLk'  // The8
+        ];
+
         async function findSeventeenPosition() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const accessToken = urlParams.get('access_token');
-        
-        const response = await fetch('https://api.spotify.com/v1/me/top/artists?limit=50', {
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-        const data = await response.json();
-        
-        const seventeenIndex = data.items.findIndex(artist => 
-            artist.name.toUpperCase() === 'SEVENTEEN'
-        );
-        
-        const resultElement = document.getElementById('seventeenResult');
-        if (seventeenIndex !== -1) {
-            resultElement.textContent = `SEVENTEEN is #${seventeenIndex + 1} in your top artists!`;
-        } else {
-            resultElement.textContent = 'SEVENTEEN is not in your top 50 artists';
+            const urlParams = new URLSearchParams(window.location.search);
+            const accessToken = urlParams.get('access_token');
+            
+            const response = await fetch('https://api.spotify.com/v1/me/top/tracks?time_range=long_term&limit=50', {
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            const data = await response.json();
+            
+            // Find the position of SEVENTEEN or related members
+            const seventeenIndex = data.items.findIndex(track => 
+                track.artists.some(artist => SEVENTEEN_IDS.includes(artist.id))
+            );
+            
+            const resultElement = document.getElementById('seventeenResult');
+            if (seventeenIndex !== -1) {
+                resultElement.textContent = `SEVENTEEN or related members are #${seventeenIndex + 1} in your top artists!`;
+            } else {
+                resultElement.textContent = 'SEVENTEEN or related members are not in your top 50 artists';
+            }
         }
-    }
+
         async function fetchTopArtists() {
             const urlParams = new URLSearchParams(window.location.search);
             const accessToken = urlParams.get('access_token');
@@ -63,6 +80,7 @@
                 artistsList.appendChild(div);
             });
         }
+
         fetchTopArtists();
     </script>
 </body>

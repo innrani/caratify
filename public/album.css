@@ -1,161 +1,101 @@
-:root {
-    --base-font: clamp(14px, 2vw, 18px);
-    --title-font: clamp(2rem, 5vw, 4.5rem);
-}
-
+/* General Styles */
 body {
-    background: linear-gradient(120deg, rgba(146, 168, 209, 0.9), rgba(247, 202, 201, 0.9)), rgba(0, 0, 0, 0.95);
-    backdrop-filter: blur(10px);
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
     margin: 0;
-    font-family: 'Montserrat', sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-  .title-container {
-      width: 90%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 60px;
-      padding: 15px;
-      margin-bottom: 40px;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(5px);
-      max-width: 8000px;;
-  }
-.title-icon {
-    height: clamp(60px, 15vw, 120px);
-    width: clamp(60px, 15vw, 120px);
+    padding: 0;
 }
 
-.title-container h1 {
-    font-size: var(--title-font);
-    font-weight: bold;
-    color: #333;
+/* Title Container */
+.title-container {
     text-align: center;
     padding: 20px;
-    gap: 20px;
+    background-color: #1DB954;
+    color: white;
 }
 
-.albums-container, #albums-container {
-    width: 90%;
-     max-width: 800px;
-      margin: 40px auto;
-      padding: 15px;
-      display: fixed;
-      flex-direction: column;
-      align-items: center;
-  }
+.title-icon {
+    width: 50px;
+    height: 50px;
+}
 
- 
+/* Main Container */
+.container {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Album Items */
 .album-item {
-    display: grid;
-    grid-template-columns: minmax(30px, auto) minmax(60px, 80px) 1fr auto;
+    display: flex;
     align-items: center;
-    gap: 20px;
-    padding: 10px;
-    margin-bottom: 15px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(5px);
-    border-radius: 12px;
-    transition: transform 0.2s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.album-item:hover {
-    transform: translateY(-3px);
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.album-cover {
-    width: 50px;
-    height: 50px;
-}
-
-/* Shine effect */
-.album-item::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 200%;
-    height: 100%;
-    background: linear-gradient(120deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.4));
-    transition: transform 1s ease;
-    transform: skewX(-25deg);
-    opacity: 0;
-}
-
-.album-item:hover::before {
-    transform: translateX(50%);
-    opacity: 1;
-}
-.album-rank {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #333;
-    min-width: 30px;
-}
-
-.album-cover {
-    width: 50px;
-    height: 50px;
+    margin-bottom: 20px;
+    background-color: white;
+    padding: 15px;
     border-radius: 8px;
-    object-fit: cover;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.album-item img {
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
+    margin-right: 20px;
 }
 
 .album-info {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    font-size: var(--base-font);
+    flex: 1;
 }
 
-.album-name {
-    font-weight: bold;
+.album-info h3 {
+    margin: 0;
+    font-size: 18px;
     color: #333;
-    font-size: 1rem;
 }
 
-.album-artist {
-    color: #666;
-    font-size: 0.9rem;
+.album-info p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #555;
 }
 
-.title-container h1 {
-    font-size: 4.5rem;
-    font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+/* Loading Screen */
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
-.spotify-button {
-    background: #1DB954;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.2s ease;
+.loading-screen.hidden {
+    display: none;
 }
 
-.spotify-button:hover {
-    background: #1ed760;
+.loading-image {
+    width: 100px;
+    height: 100px;
 }
 
+/* Responsive Design */
 @media (max-width: 600px) {
     .album-item {
-        grid-template-columns: 1fr auto;
-        gap: 15px;
+        flex-direction: column;
+        text-align: center;
     }
 
-    .album-cover {
-        display: none;
+    .album-item img {
+        margin-right: 0;
+        margin-bottom: 10px;
     }
 
-    .title-text {
-        font-size: 1.8rem;
+    .container {
+        padding: 10px;
     }
 }
